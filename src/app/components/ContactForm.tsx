@@ -51,14 +51,20 @@ export default function ContactForm() {
     setError('')
 
     try {
+      const formDataToSend = new FormData()
+      formDataToSend.append('fullName', formData.fullName)
+      formDataToSend.append('phone', formData.phone)
+      formDataToSend.append('email', formData.email)
+      formDataToSend.append('city', formData.city)
+      formDataToSend.append('projectType', formData.projectType)
+      formDataToSend.append('timeline', formData.timeline)
+      formDataToSend.append('projectDetails', formData.projectDetails)
+
       const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbx8_pTuw7bX1EkiU96bC5hWLd9TVOX1UiGBZWL9D_GSTNWlvkqAbBhOMH0vtaNfh_LG/exec',
+        'https://script.google.com/macros/s/AKfycby9UjVraaS_UAmPFUVljQNnyBATqnPogp7KlQVW_mPS26sRbTEkrFQUMPYmzePoY1RV/exec',
         {
           method: 'POST',
-          body: JSON.stringify(formData),
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          body: formDataToSend
         }
       )
 
