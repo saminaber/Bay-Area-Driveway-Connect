@@ -10,11 +10,12 @@ export default function ContactForm() {
     city: '',
     projectType: '',
     timeline: '',
-    details: ''
+    projectDetails: ''
   })
 
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const projectTypes = [
     'Driveway Replacement',
@@ -41,23 +42,33 @@ export default function ContactForm() {
       ...prev,
       [name]: value
     }))
+    setError('')
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
 
     try {
-      // Send email via FormSubmit or similar service
-      // For now, we'll create a mailto link with form data
-      const mailtoLink = `mailto:saminaber2005@gmail.com?subject=New%20Project%20Request%20from%20${encodeURIComponent(formData.fullName)}&body=${encodeURIComponent(
-        `Name: ${formData.fullName}\nPhone: ${formData.phone}\nEmail: ${formData.email}\nCity: ${formData.city}\nProject Type: ${formData.projectType}\nTimeline: ${formData.timeline}\n\nProject Details:\n${formData.details}`
-      )}`
-      
-      window.location.href = mailtoLink
+      const response = await fetch(
+        'https://script.google.com/macros/s/AKfycbx8_pTuw7bX1EkiU96bC5hWLd9TVOX1UiGBZWL9D_GSTNWlvkqAbBhOMH0vtaNfh_LG/exec',
+        {
+          method: 'POST',
+          body: JSON.stringify(formData),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Submission failed')
+      }
+
       setSubmitted(true)
       
-      // Reset form after a delay
+      // Reset form after 3 seconds
       setTimeout(() => {
         setFormData({
           fullName: '',
@@ -66,12 +77,13 @@ export default function ContactForm() {
           city: '',
           projectType: '',
           timeline: '',
-          details: ''
+          projectDetails: ''
         })
         setSubmitted(false)
-      }, 1000)
-    } catch (error) {
-      console.error('Form submission error:', error)
+      }, 3000)
+    } catch (err) {
+      console.error('Form submission error:', err)
+      setError('Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -205,13 +217,13 @@ export default function ContactForm() {
 
           {/* Project Details */}
           <div>
-            <label htmlFor="details" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="projectDetails" className="block text-sm font-semibold text-gray-700 mb-2">
               Project Details *
             </label>
             <textarea
-              id="details"
-              name="details"
-              value={formData.details}
+              id="projectDetails"
+              name="projectDetails"
+              value={formData.projectDetails}
               onChange={handleChange}
               required
               rows={5}
@@ -231,7 +243,13 @@ export default function ContactForm() {
 
           {submitted && (
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-center">
-              ✓ Thank you! Your request has been submitted. We&apos;ll review it and send you contractor matches soon.
+              ✓ Request submitted. We&apos;ll review it and send you contractor matches soon.
+            </div>
+          )}
+
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-center">
+              ✗ {error}
             </div>
           )}
 
